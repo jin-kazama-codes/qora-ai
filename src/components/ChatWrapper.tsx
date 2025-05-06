@@ -334,6 +334,7 @@ export const ChatWrapper = ({
           handleSubmit={handleSubmit}
           setInput={setInput}
           formRef={formRef}
+          handlePromptButton={handlePromptButton}
         />
       </div>
 

@@ -1,9 +1,10 @@
 "use client";
 
 import { Button, Textarea } from "@nextui-org/react";
-import { Send } from "lucide-react";
+import { MessageCircle, Send } from "lucide-react";
 import { type useChat } from "ai/react";
 import { Ref, useEffect, useState } from "react";
+import PreBuildPrompt from "./PreBuildPrompt";
 
 type HandleInputChange = ReturnType<typeof useChat>["handleInputChange"];
 type HandleSubmit = ReturnType<typeof useChat>["handleSubmit"];
@@ -21,10 +22,12 @@ interface ChatInputProps {
   isDetailsSubmitted?: boolean;
   setHasSubmittedPrompt?: (value: boolean) => void;
   hasSubmittedPrompt?: boolean;
+  handlePromptButton?: (prompt: string) => void;
 }
 
 export const ChatInput = ({
   handleInputChange,
+  handlePromptButton,
   handleSubmit,
   input,
   setInput,
@@ -36,6 +39,9 @@ export const ChatInput = ({
   setHasSubmittedPrompt,
   hasSubmittedPrompt,
 }: ChatInputProps) => {
+
+  const [showModal, setShowModal] = useState(false);
+
   useEffect(() => {
     if (salesMagnet && prompt) {
       setInput(prompt);
@@ -59,6 +65,16 @@ export const ChatInput = ({
     setInput("");
   };
 
+  const handleIconClick = () => {
+    setShowModal(true); // Show modal on icon click
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false); // Close modal
+  };
+
+  console.log('handlePromptButton in PreBuildPrompt:', handlePromptButton);
+
   return (
     <div className="z-10 bg-[#151221] bottom-0 left-0 w-full p-4">
       <form
@@ -66,22 +82,29 @@ export const ChatInput = ({
         onSubmit={handleCustomSubmit}
         className="relative max-w-4xl mx-auto"
       >
-        <Textarea
-          minRows={4}
-          autoFocus
-          onChange={handleInputChange}
-          value={input}
-          disabled={salesMagnet && hasSubmittedPrompt}
-          readOnly={salesMagnet && !!prompt}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleCustomSubmit();
-            }
-          }}
-          placeholder="Message Oliver..."
-          className="resize-none bg-zinc-800 hover:bg-zinc-900 focus:!ring-violet-600 rounded-xl text-base w-full"
-        />
+        <div className="flex items-center">
+          <MessageCircle
+            className="text-gray-400 mr-2 cursor-pointer"
+            size={20}
+            onClick={handleIconClick} // Trigger modal on click
+          />
+          <Textarea
+            minRows={4}
+            autoFocus
+            onChange={handleInputChange}
+            value={input}
+            disabled={salesMagnet && hasSubmittedPrompt}
+            readOnly={salesMagnet && !!prompt}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleCustomSubmit();
+              }
+            }}
+            placeholder="Message Oliver..."
+            className="resize-none bg-zinc-800 hover:bg-zinc-900 focus:!ring-violet-600 rounded-xl text-base w-full"
+          />
+        </div>
         <Button
           size="sm"
           type="submit"
@@ -91,6 +114,12 @@ export const ChatInput = ({
           <Send className="size-4" />
         </Button>
       </form>
+      {showModal && handlePromptButton && (
+        <PreBuildPrompt
+          onClose={handleCloseModal}
+          handlePromptButton={handlePromptButton} // Pass handlePromptButton to PreBuildPrompt
+        />
+      )}
     </div>
   );
 };
